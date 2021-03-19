@@ -61,7 +61,7 @@ local ITEM_SIZE = addon.ITEM_SIZE
 
 local buttonClass, buttonProto = addon:NewClass("ItemButton", "ItemButton", "ContainerFrameItemButtonTemplate", "ABEvent-1.0")
 
-local childrenNames = { "Cooldown", "IconTexture", "IconQuestTexture", "Count", "Stock", "NormalTexture", "NewItemTexture" }
+local childrenNames = { "Cooldown", "IconTexture", "IconQuestTexture", "Count", "Stock", "NormalTexture", "NewItemTexture", "IconOverlay" }
 
 function buttonProto:OnCreate()
 	local name = self:GetName()
@@ -305,6 +305,7 @@ function buttonProto:Update()
 	else
 		self.Stock:Hide()
 	end
+	self:UpdateOverlay()
 	self:UpdateCount()
 	self:UpdateBorder()
 	self:UpdateCooldown()
@@ -415,6 +416,27 @@ function buttonProto:UpdateBorder(isolatedEvent)
 	end
 	if isolatedEvent then
 		addon:SendMessage('AdiBags_UpdateBorder', self)
+	end
+end
+
+function buttonProto:UpdateOverlay(isolatedEvent)
+	if self.hasItem then
+		local overlay = self.IconOverlay
+		local textureName = nil
+		if C_AzeriteEmpoweredItem.IsAzeriteEmpoweredItemByID(self.itemLink or self.itemId) then
+			textureName = "AzeriteIconFrame"
+		elseif IsCorruptedItem(self.itemLink or self.itemId) then
+			textureName = "Nzoth-inventory-icon"
+		end
+		overlay:Hide();
+		if textureName then
+			overlay:SetAtlas(textureName);
+			overlay:SetBlendMode("BLEND");
+			overlay:Show();
+		end
+	end
+	if isolatedEvent then
+		addon:SendMessage('AdiBags_UpdateOverlay', self)
 	end
 end
 
